@@ -47,13 +47,13 @@ Lambda: alexa-oauth_twitter の環境変数「CALLBACK_URL」にAPI Gatewayの/o
 ### Amazon Alexa Skillの設定
 
 #### アカウントリンク
-認証種別としてImplicit Grantを選択し，認証画面URIにAPI Gatewayの/oauth/request_tokenのURLを設定する．
+認証種別としてImplicit Grantを選択し，認証画面URIにAPI Gatewayの/oauth/request_tokenのURLを設定する．
 
 #### エンドポイント
 エンドポイントに，alexa-tweet_skillのLambdaを設定する
 
 #### インテント
-TweetRequestとしてツイートの発話のリクエストを作成する．
+TweetRequestとしてツイートの発話のリクエストを作成する．
 
 # 構成
 ### ソースコードのエントリポイント
@@ -63,7 +63,7 @@ TweetRequestとしてツイートの発話のリクエストを作成する．
 ### OAuth認証
 Amazon echoのスキルがツイートをするためにツイッターのOAuth認証を行います．
 Amazon echoはOAuth2が必要ですが，2018年7月29日現在ツイッターのツイート用APIはOAuth1認証です．
-そこで，認証時にトンネリングすることで，OAuth1, OAuth2の変換を行っています．
+そこで，認証時にトンネリングすることで，OAuth1, OAuth2の変換を行っています．
 
 トンネリングを行うために，ApiGateway + LambdaでAmazon echoからの認証をリクエストを受け付け認証処理を仲介します．
 
