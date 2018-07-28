@@ -1,0 +1,129 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+
+Resources:
+  AccessPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: AlexaTweetPolicy
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement: 
+          - Effect: Allow
+            Action:
+              - "logs:CreateLogStream"
+              - "logs:PutLogEvents"
+              - "logs:CreateLogGroup"
+            Resource: "arn:aws:logs:*:*:*"
+          - Effect: Allow
+            Action:
+              - "ssm:GetParameter"
+            Resource: 
+              - "arn:aws:ssm:*:*:parameter/TWITTER_CONSUMER_KEY"
+              - "arn:aws:ssm:*:*:parameter/TWITTER_CONSUMER_SECRET"
+  AccessRole:
+    Type: AWS::IAM::Role
+    Properties:
+      ManagedPolicyArns: 
+        - !Ref "AccessPolicy"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: "sts:AssumeRole"
+  
+  OAuthLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: "alexa-oauth_twitter"
+      CodeUri: ../artifacts/oauth
+      Handler: index.handler
+      Description: ''
+      Runtime: nodejs8.10
+      MemorySize: 128
+      Timeout: 20
+      Role: !GetAtt [ "AccessRole", "Arn" ]
+      Environment:
+        Variables:
+          CALLBACK_URL: ""
+
+  OAuthLambdaPermission:
+    Type: 'AWS::Lambda::Permission'
+    DependsOn:
+      - ApiGateway
+      - OAuthLambda
+    Properties:
+      Action: 'lambda:InvokeFunction'
+      FunctionName: !Ref OAuthLambda
+      Principal: apigateway.amazonaws.com  
+
+  SkillLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: "alexa-tweet-skill"
+      CodeUri: ../artifacts/skill
+      Handler: index.handler
+      Description: ''
+      Runtime: nodejs8.10
+      MemorySize: 128
+      Timeout: 20
+      Role: !GetAtt [ "AccessRole", "Arn" ]
+      Events:
+        AlexaSkillEvent:
+          Type: AlexaSkill
+      
+  ApiGateway:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: default
+      DefinitionBody:
+        swagger: "2.0"
+        info:
+          version: "1.0.0"
+          title: "twitter_oauth"
+        basePath: "/api1"
+        schemes:
+        - "https"
+        paths:
+          /oauth/callback:
+            get:
+              produces:
+              - "application/json"
+              responses:
+                "200":
+                  description: "200 response"
+                  schema:
+                    $ref: "#/definitions/Empty"
+              x-amazon-apigateway-integration:
+                uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${OAuthLambda.Arn}/invocations"
+                responses:
+                  default:
+                    statusCode: "200"
+                passthroughBehavior: "when_no_match"
+                httpMethod: "POST"
+                contentHandling: "CONVERT_TO_TEXT"
+                type: "aws_proxy"
+          /oauth/request_token:
+            get:
+              produces:
+              - "application/json"
+              responses:
+                "200":
+                  description: "200 response"
+                  schema:
+                    $ref: "#/definitions/Empty"
+              x-amazon-apigateway-integration:
+                uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${OAuthLambda.Arn}/invocations"
+                responses:
+                  default:
+                    statusCode: "200"
+                passthroughBehavior: "when_no_match"
+                httpMethod: "POST"
+                contentHandling: "CONVERT_TO_TEXT"
+                type: "aws_proxy"
+        definitions:
+          Empty:
+            type: "object"
+            title: "Empty Schema"
