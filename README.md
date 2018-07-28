@@ -37,19 +37,19 @@ aws ssm put-parameter --name TWITTER_CONSUMER_SECRET --value {consumer secret} -
 
 #### Lambdaの環境変数追加
 
-Lambda: alexa-oauth_twitter の環境変数「CALLBACK_URL」にAPI Gatewayの/oauth/callbackのURLを登録します．(本来なら固定のドメインを取得してsamファイルで設定するのが理想)
+Lambda: alexa-oauth_twitter の環境変数「CALLBACK_URL」にAPI Gatewayの/oauth/callbackのURLを登録します．(本来なら固定のドメインを取得してsamファイルで設定するのが理想)
 
 ### ツイッターの設定
 ツイッターのアプリ管理画面を開き，Callback URLsにAPI Gatewayの /oauth/request_token のURLを追加する．
 
-- 最低２つのURLを指定する必要があるようなので，API GatewayのStageとdefualtのバージョンを指定する．
+- 最低２つのURLを指定する必要があるようなので，API GatewayのStageとdefualtのバージョンを指定する．
 
 ### Amazon Alexa Skillの設定
 
 #### アカウントリンク
-認証種別としてImplicit Grantを選択し，認証画面URIにAPI Gatewayの/oauth/request_tokenのURLを設定する．
+認証種別としてImplicit Grantを選択し，認証画面URIにAPI Gatewayの/oauth/request_tokenのURLを設定する．
 
-#### エンドポイント
+#### エンドポイント
 エンドポイントに，alexa-tweet_skillのLambdaを設定する
 
 #### インテント
