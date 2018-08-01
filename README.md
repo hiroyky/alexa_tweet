@@ -5,7 +5,7 @@ Amazon echoでツイッターにツイートするスキルのサンプルプロ
 - ツイートするスキル本体
 
 # 解説記事
-
+https://qiita.com/hiroyky/items/b8375292a62ee5e4f646
 
 # ビルド & デプロイ
 nodejsを実行できる環境が必要です．
